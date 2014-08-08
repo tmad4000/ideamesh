@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Graph</title>
+  <script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+
+
+  
+
+  <!-- <link rel="stylesheet/less" type="text/css" href="styles/style.less" />
+ --><!-- 
+  <script src="js/lib/less-1.7.0.min.js" type="text/javascript"></script>  
+ -->
+
+<script src="http://www.d3plus.org/js/d3.js"></script>
+<script src="http://www.d3plus.org/js/d3plus.js"></script> 
+  
+<script type="text/javascript">
+  $(function() {
+   var rawdat=$.get( "rawdat.txt", function( data ) {
+       $( "#in" ).html( data.trim());
+       $("#sub").click()
+    });
+
+
+    $("#sub").click(function() {
+   
+     var rawdat=$("#in").val().trim();
+ 
+    // #doc source pos typeindex type topic
+    // 0 output/crunchbase/glumobilemedia 0 0 glu 28
+    // 0 output/crunchbase/glumobilemedia 1 1 mobile 40
+    
+    var rawLinesRay=rawdat.split("\n")
+    var lines=[]
+
+    var topics={}
+    var cos={}
+
+    var nodes_d={}
+
+    var linksD={}
+    var links=[]
+  
+    // #doc source pos typeindex type topic
+    for(var i=0; i<rawLinesRay.length;i++) {
+      var rawLineRay=rawLinesRay[i].split(" ");
+      
+      var pid=rawLineRay[0]+""+rawLineRay[2]
+      
+      var line={pid:pid, coid:rawLineRay[0],title:rawLineRay[1].substr("output/crunchbase/".length), typeindex:rawLineRay[3], type:rawLineRay[4], topic:rawLineRay[5]}
+
+
+
+      if(!(line.topic in topics)) {
+        var topicObj={coid:"99"+line.topic, title:line.topic, typeindex:line["typeindex"], type:line["type"], topic:line.topic,isTopic:true}
+        topics[line.topic]=topicObj;
+        nodes_d[topicObj['coid']]=topicObj
+
+        //lines.push(topicObj);
+      }
+      
+      if(!(line.coid in cos)) {
+
+        cos[line.coid]=line;
+        
+        linksD[line['coid']]={};
+
+ 
+        //lines.push(topicObj);
+      }
+
+      nodes_d[line['coid']]=line
+
+        if((linksD[line['coid']]["99"+line.topic] === undefined)) {
+          linksD[line['coid']]["99"+line.topic]=true
+          var link={source:line['coid'], target:"99"+line.topic, value:0}
+
+          links.push(link);
+
+          //lines.push(topicObj);
+        }
+    }      
+
+
+
+    console.log("lines",lines)
+    console.log("links",links)
+    console.log("topics",topics)
+    console.log("nodes_d",nodes_d)
+
+
+  var relations_orig=links;
+  //{prim_key:436, source:1106, target:1213, value:0, time:1402333770, uid:null, mapid:0,…}
+  var relations=[];
+
+  var nodes_orig=Object.keys(nodes_d).map(function(key){
+    return nodes_d[key];
+}); //lines;
+  //{pid:1608, time:1404922870, title:#test, body:#test, status:0, progress:, metric:, uid:0, parent:0,…}
+
+
+  var nodes=[];
+  var sample_data = [
+    {"prim_key":"778", "name": "alpha", "size": 10},
+    {"prim_key":"781", "name": "beta", "size": 12},
+    {"prim_key":"3", "name": "gamma", "size": 30},
+    {"prim_key":"4", "name": "delta", "size": 26},
+    {"prim_key":"5", "name": "epsilon", "size": 12},
+    
+  ]
+
+  for(i=0;i<relations_orig.length;i++) {
+      if(isNaN (relations_orig[i]['source']) ||isNaN(relations_orig[i]['target']) )
+      {
+        console.log("nan")
+        continue;
+      }
+      relations[i]={};
+      relations[i]['source']=relations_orig[i]['source']
+      relations[i]['target']=relations_orig[i]['target']
+      // relations[i]['strength']=relations_orig[i]['strength']
+
+    // console.log(relations[i]['source'],relations[i]['target'])
+    //   relations[i]['source']=relations_orig[i]['source']['prim_key']
+    //   relations[i]['target']=relations_orig[i]['target']['prim_key']
+    }
+
+  for(i=0;i<nodes_orig.length;i++) {
+      
+      if(nodes_orig[i]===undefined||nodes_orig[i]['title']===undefined || nodes_orig[i]['pid']===undefined) {
+        console.log("nodebad",nodes_orig[i]['pid'])
+        continue
+      }
+
+      nodes[i]={};
+      nodes[i]['title']=nodes_orig[i]['title'];
+      nodes[i]['name']=nodes_orig[i]['title'];
+      nodes[i]['body']=nodes_orig[i]['body'];
+      nodes[i]['coid']=nodes_orig[i]['coid'];
+      nodes[i]['pid']=nodes_orig[i]['pid'];
+      nodes[i]['size']=20;
+
+    }
+
+ var relationsf=relations //.slice(0,3)
+
+console.log(relations[0]['source'],relations[0]['target'])
+
+
+ // var rvisualization = d3plus.viz()
+ //    .container("#rviz")  // container DIV to hold the visualization
+ //    .type("rings")
+ //    .data(nodes)      // visualization type
+ //    .edges(relationsf) // list of node connections
+ //    .focus(relationsf[0]['source'])
+ //    .id("pid")
+ //    .text("title")
+ //    .tooltip("body")     // ID of the initial center node
+ //    .draw()             // finally, draw the visualization!
+
+
+
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .type("network")
+    .data(nodes)
+    .edges(relationsf)
+    .size("size")
+    .id("coid")
+    .text("title")
+    .tooltip("body")
+    .draw();
+
+
+  })
+
+
+
+
+
+})
+</script>
+
+<style type="text/css">
+  #sub {
+    width:100px;
+    height: 20px;
+    float:left;
+  }
+  #in {
+    width:400px;
+    height: 400px;
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="container-fluid outermost" > 
+
+
+<textarea id="in"></textarea>
+<button id="sub">Submit</button>
+<div id="view">
+<!-- 
+<div id="rviz" style="height:800px"></div> -->
+
+<div id="viz" style="height:600px;border:1px solid black"></div>
+<div id="viz2" style=""></div>
+</div>
+<script>
+
+  // var sample_data = [
+  //   {"name": "alpha", "size": 10},
+  //   {"name": "beta", "size": 12},
+  //   {"name": "gamma", "size": 30},
+  //   {"name": "delta", "size": 26},
+  //   {"name": "epsilon", "size": 12},
+  //   {"name": "zeta", "size": 26},
+  //   {"name": "theta", "size": 11},
+  //   {"name": "eta", "size": 24}
+  // ]
+
+  // var connections = [
+  //   {"source": "alpha", "target": "beta"},
+  //   {"source": "alpha", "target": "gamma"},
+  //   {"source": "beta", "target": "delta"},
+  //   {"source": "beta", "target": "epsilon"},
+  //   {"source": "zeta", "target": "gamma"},
+  //   {"source": "theta", "target": "gamma"},
+  //   {"source": "eta", "target": "gamma"}
+  // ]
+/*
+  var data = $.parseJSON(localStorage.getItem("posts"));
+  var relations_orig=data['links'];
+  //{prim_key:436, source:1106, target:1213, value:0, time:1402333770, uid:null, mapid:0,…}
+  var relations=[];
+
+  var nodes_orig=data['flatPosts'];
+  //{pid:1608, time:1404922870, title:#test, body:#test, status:0, progress:, metric:, uid:0, parent:0,…}
+
+
+  var nodes=[];
+  var sample_data = [
+    {"prim_key":"778", "name": "alpha", "size": 10},
+    {"prim_key":"781", "name": "beta", "size": 12},
+    {"prim_key":"3", "name": "gamma", "size": 30},
+    {"prim_key":"4", "name": "delta", "size": 26},
+    {"prim_key":"5", "name": "epsilon", "size": 12},
+    
+  ]
+
+  for(i=0;i<relations_orig.length;i++) {
+      if(isNaN(relations_orig[i]['source'])||isNaN(relations_orig[i]['target']))
+      {
+        console("nan")
+        continue;
+      }
+      relations[i]={};
+      relations[i]['source']=relations_orig[i]['source']
+      relations[i]['target']=relations_orig[i]['target']
+      // relations[i]['strength']=relations_orig[i]['strength']
+
+    // console.log(relations[i]['source'],relations[i]['target'])
+    //   relations[i]['source']=relations_orig[i]['source']['prim_key']
+    //   relations[i]['target']=relations_orig[i]['target']['prim_key']
+    }
+
+  for(i=0;i<nodes_orig.length;i++) {
+      
+      if(nodes_orig[i]===undefined||nodes_orig[i]['title']===undefined || nodes_orig[i]['pid']===undefined) {
+        console.log("nodebad",nodes_orig[i]['pid'])
+        continue
+      }
+
+      nodes[i]={};
+      nodes[i]['title']=nodes_orig[i]['title'];
+      nodes[i]['name']=nodes_orig[i]['title'];
+      nodes[i]['body']=nodes_orig[i]['body'];
+      nodes[i]['pid']=nodes_orig[i]['pid'];
+      nodes[i]['size']=20;
+
+    }
+
+ relationsf=relations //.slice(0,3)
+
+console.log(relations[0]['source'],relations[0]['target'])
+
+
+ var rvisualization = d3plus.viz()
+    .container("#rviz")  // container DIV to hold the visualization
+    .type("rings")
+    .data(nodes)      // visualization type
+    .edges(relationsf) // list of node connections
+    .focus(relationsf[0]['source'])
+    .id("pid")
+    .text("title")
+    .tooltip("body")     // ID of the initial center node
+    .draw()             // finally, draw the visualization!
+
+
+
+q  var visualization = d3plus.viz()
+    .container("#viz")
+    .type("network")
+    .data(nodes)
+    .edges(relationsf)
+    // .size("size")
+    .id("pid")
+    .text("title")
+    .tooltip("body")
+    .draw();
+
+
+     setTimeout(function(){
+     
+ relationsf=relations.slice(0,4)
+      visualization
+        // .data(nodes)
+        .edges(relationsf)
+        .draw()
+   
+    },2000) // wait 2 seconds before changing the scale
+*/
+
+var sample_data = [
+    {"name": "alpha", "size": 10},
+    {"name": "beta", "size": 12},
+    {"name": "gamma", "size": 30},
+    {"name": "delta", "size": 26},
+    {"name": "epsilon", "size": 12},
+    {"name": "zeta", "size": 26},
+    {"name": "theta", "size": 11},
+    {"name": "eta", "size": 24}
+  ]
+
+  var connections = [
+    {"source": "alpha", "target": "beta"},
+    {"source": "alpha", "target": "gamma"},
+    {"source": "beta", "target": "delta"},
+    {"source": "beta", "target": "epsilon"},
+    {"source": "zeta", "target": "gamma"},
+    {"source": "theta", "target": "gamma"},
+    {"source": "eta", "target": "gamma"}
+  ]
+
+  var visualization2 = d3plus.viz()
+    .container("#viz2")
+    .type("network")
+    .data(sample_data)
+    .edges(connections)
+    .size("size")
+    .id("name")
+    .draw()
+</script>
+
+
+
+
+    <!-- <iframe id="peopletable" src="http://rhizi-hackathonprojects.herokuapp.com/" style="height:100%;width:100%;border:0px;margin-left:-15px;margin-top:0px;margin-right:-30px;"></iframe> -->
+  </div><!--/.fluid-container-->
+ 
+</body>
+</html>
