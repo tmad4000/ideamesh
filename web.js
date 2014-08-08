@@ -3,7 +3,8 @@ require('coffee-script');
 
 //var url = process.env.NEO4J_URL || 'http://localhost:7474';
 //var url = 'http://localhost:7474/';
-var url ='http://mit100k:P134oFe0FGJJ16Ns9tia@mit100k.sb02.stations.graphenedb.com:24789';
+var url ='http://rhizi-space2:sVQCUXn6CVO3Vzm3ArZz@rhizispace2.sb02.stations.graphenedb.com:24789';
+//var url ='http://mit100k:P134oFe0FGJJ16Ns9tia@mit100k.sb02.stations.graphenedb.com:24789';
 // var url = 'http://rhizi-hackathonprojects:cfjNWHxnsKuX2MdJgCa7@rhizihackathonprojects.sb01.stations.graphenedb.com:24789';
 // var url = 'http://wikinets-edge:wiKnj2gYeYOlzWPUcKYb@wikinetsedge.sb01.stations.graphenedb.com:24789';
 

@@ -16,8 +16,35 @@ module.exports = class MyApp
       app.use express.static(__dirname+'/static')
 
     app.get('/', (request,response)->
-      response.render('index.jade')
+      console.log "get_ideamaps"
+      cypherQuery = "Match (n:ideamap) RETURN n"
+      console.log "Executing " + cypherQuery
+      graphDb.cypher.execute(cypherQuery).then(
+        (noderes)->
+          console.log "get_ideamaps Lookup Executed"
+          nodeList =  (addID(n[0].data,trim(n[0].self)[0]) for n in noderes.data)
+          console.log nodeList
+          response.render('index.jade', {
+            "ideamaps" : nodeList
+          });
+      )
     )
+
+    app.get('/map/:slug', (request,response)->
+      console.log "get_ideamaps"  
+      response.render('ideamap.jade', {
+        "slug" : request.params.slug
+      })
+    )
+
+    app.get('/map', (request,response)->
+      console.log "get_ideamaps"  
+      response.render('ideamap.jade', {
+        "slug" : request.params.slug
+      })
+    )
+
+
 
     ###  Responds with a JSON formatted for D3JS viz of the entire Neo4j database ###
     # Not currently used, but should be updated to include link information
@@ -31,6 +58,8 @@ module.exports = class MyApp
     app.get('/get_nodes', (request,response)->
       console.log "get_nodes Query Requested"
       cypherQuery = "start n=node(*) return n;"
+      #where n.slug=#{request.params.mapslug} 
+      
       console.log "Executing " + cypherQuery
       graphDb.cypher.execute(cypherQuery).then(
         (noderes)->
@@ -45,7 +74,12 @@ module.exports = class MyApp
     ###
     app.get('/get_default_nodes', (request,response)->
       console.log "get_default_nodes Query Requested"
-      cypherQuery = "start n=node(*) where n.shouldLoad=\"true\" return n;"
+      
+      cypherQuery = "start n=node(*) where n.shouldLoad=\"true\" return n" # UNION (MATCH (n) RETURN n LIMIT 40);"
+      cypherQuery = "start n=node(*) return n limit 40 UNION start n=node(*) where n.shouldLoad=\"true\" return n;"
+
+      # cypherQuery = "start n=node(*) return n limit 40;"
+      # cypherQuery = "start n=node(*) where n.shouldLoad=\"true\" return n"
       console.log "Executing " + cypherQuery
       graphDb.cypher.execute(cypherQuery).then(
         (noderes)->
@@ -54,6 +88,40 @@ module.exports = class MyApp
           response.json nodeList
       )
     )
+
+    app.get('/get_ideamaps', (request,response)->
+      console.log "get_ideamaps"
+      cypherQuery = "Match (n:ideamap) RETURN n"
+      console.log "Executing " + cypherQuery
+      graphDb.cypher.execute(cypherQuery).then(
+        (noderes)->
+          console.log "get_default_nodes Lookup Executed"
+          nodeList =  (addID(n[0].data,trim(n[0].self)[0]) for n in noderes.data)
+          response.json nodeList
+      )
+    )
+
+    app.post('/create_ideamap', (request, response) ->
+      console.log "Map Creation Requested"
+      console.log request.body
+      slug = request.body.ideamapname.toLowerCase().replace(/[ ]/g,'-').replace(/[^a-z0-9\-]/g, '')
+      cypherQuery = "CREATE (n:ideamap {slug:'#{slug}', name:'#{request.body.ideamapname}'})"
+
+      console.log "Executing " + cypherQuery
+ 
+      graphDb.cypher.execute(cypherQuery).then(
+        (noderes) ->
+          # console.log "query",noderes.data
+          # nodeIDstart = noderes.data[0][0]["self"].lastIndexOf('/') + 1
+          # nodeID = noderes.data[0][0]["self"].slice(nodeIDstart)
+          # console.log "Node Creation Done, ID = " + nodeID
+          # newNode = noderes.data[0][0]["data"]
+          # newNode['_id'] = nodeID
+          # console.log "newNode: ", newNode
+          response.redirect "/"
+      )
+    )
+
 
     ### Creates a node using a Cypher query ###
     app.post('/create_node', (request, response) ->
