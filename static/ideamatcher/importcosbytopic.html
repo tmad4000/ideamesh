@@ -17,7 +17,7 @@
 
 <script type="text/javascript">
   $(function() {
-   var rawdat=$.get( "crunchbase-topic_cut", function( data ) {
+   var rawdat=$.get( "crunchbase-topic_cut.txt", function( data ) {
      $( "#in" ).html( data.trim());
      $("#sub").click()
    });
@@ -258,7 +258,8 @@
 
   <div class="container-fluid outermost" > 
 
-<h3>Force and rings network visualizations of LDA Models</h3>
+<h3>Force and rings network visualizations of LDA Models</h3> 
+<a href="crunchbase-topic.txt" target="_blank">More Data</a>
     <div class="row">
       <div class="box">
         <div class="label">Input</div>
