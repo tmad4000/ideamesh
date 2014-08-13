@@ -67,7 +67,8 @@ module.exports = class MyApp
           nodeList = makeNodeJsonFromCypherQuery(noderes) #(addID(n[0].data,trim(n[0].self)[0]) for n in noderes.data)
           response.json nodeList
       )
-    )
+    )    
+
 
     ### Responds with a list of all the nodes 
         that have the shouldLoad attribute as true

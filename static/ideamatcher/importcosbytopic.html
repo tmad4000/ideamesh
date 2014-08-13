@@ -18,6 +18,7 @@
 <script type="text/javascript">
   $(function() {
    var rawdat=$.get( "crunchbase-topic_cut.txt", function( data ) {
+
      $( "#in" ).html( data.trim());
      $("#sub").click()
    });
